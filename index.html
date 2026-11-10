@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Puppuchino Homepage A</title>
+    <link rel="stylesheet" href="style.css">
+    <head> 
+    </head>
+    <body>
+       <nav class="navbar">
+      <div class="navbar__container">
+        <a href="index.html" id="navbar__logo"><img src="puppuccino logo mug.png" width="100" alt="Puppuccino Logo"></a>
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+        <ul class="navbar__menu">
+          <li class="navbar__item">
+            <a href="index.html" class="navbar__links"> Startseite </a>
+          </li>
+          
+          <li class="navbar__item">
+            <a href="index.html" class="navbar__links"> Regeln </a>
+          </li>
+
+          <li class="navbar__item">
+            <a href="index.html" class="navbar__links"> Unsere Hunde </a>
+          </li>
+
+          <li class="navbar__item">
+            <a href="index.html" class="navbar__links"> Unser Angebot </a>
+          </li>
+          
+          <li class="navbar__item">
+            <a href="index.html" class="navbar__links"> Über uns </a>
+          </li>
+          
+          <li class="navbar__item">
+            <a href="index.html" class="navbar__links"> Mitmachen </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+<header>
+
+
+ <div class="weather-card" id="weatherCard">
+    <h1>Wetter wird geladen …</h1>
+    <div class="temperature">–<span class="unit">°C</span></div>
+    <div class="details">
+        <div class="detail-item">
+            <span class="detail-label">Wind</span>
+            <span class="detail-value" id="windValue">–</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Luftfeuchte</span>
+            <span class="detail-value" id="humidityValue">–</span>
+        </div>
+    </div>
+    <div class="status" id="statusText">Rufe Open-Meteo API auf …</div>
+</div>
+
+<script>
+    (function() {
+        // === Koordinaten hier anpassen ===
+        // Standard: Berlin (52.52, 13.41)
+        const latitude = 52.52;
+        const longitude = 13.41;
+
+        // API-URL für aktuelle Wetterdaten
+        // Dokumentation: https://open-meteo.com/en/docs
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&timezone=auto`;
+
+        const weatherCard = document.getElementById('weatherCard');
+        const statusText = document.getElementById('statusText');
+
+        // WMO Weather interpretation codes (für eine grobe textuelle Beschreibung)
+        // Quelle: https://open-meteo.com/en/docs (WMO Weather interpretation codes)
+        function getWeatherDescription(code) {
+            if (code === 0) return 'Klarer Himmel';
+            if (code === 1) return 'Überwiegend klar';
+            if (code === 2) return 'Teilweise bewölkt';
+            if (code === 3) return 'Bedeckt';
+            if (code === 45 || code === 48) return 'Nebel';
+            if (code >= 51 && code <= 55) return 'Nieselregen';
+            if (code >= 56 && code <= 57) return 'Gefrierender Nieselregen';
+            if (code >= 61 && code <= 65) return 'Regen';
+            if (code >= 66 && code <= 67) return 'Gefrierender Regen';
+            if (code >= 71 && code <= 77) return 'Schneefall';
+            if (code >= 80 && code <= 82) return 'Regenschauer';
+            if (code >= 85 && code <= 86) return 'Schneeschauer';
+            if (code === 95) return 'Gewitter';
+            if (code >= 96 && code <= 99) return 'Gewitter mit Hagel';
+            return 'Unbekannt';
+        }
+
+        // Fetch-Funktion
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP-Fehler: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Open-Meteo Antwort:', data);
+
+                // Überprüfen, ob 'current' vorhanden ist
+                if (!data.current) {
+                    throw new Error('Keine aktuellen Wetterdaten in der Antwort gefunden.');
+                }
+
+                const current = data.current;
+                const temp = current.temperature_2m;
+                const wind = current.wind_speed_10m;
+                const humidity = current.relative_humidity_2m;
+                // Weather code ist nicht immer in 'current' enthalten, wenn nicht explizit angefragt.
+                // Wir haben ihn oben nicht angefragt, daher nutzen wir ihn hier nicht zwingend.
+                // Falls du ihn willst, füge 'weather_code' zur current-Liste in der URL hinzu.
+
+                // UI aktualisieren
+                weatherCard.innerHTML = `
+                    <h1>${getWeatherDescription(current.weather_code || 0)}</h1>
+                    <div class="temperature">${Math.round(temp)}<span class="unit">°C</span></div>
+                    <div class="details">
+                        <div class="detail-item">
+                            <span class="detail-label">Wind</span>
+                            <span class="detail-value">${Math.round(wind)} km/h</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Luftfeuchte</span>
+                            <span class="detail-value">${humidity} %</span>
+                        </div>
+                    </div>
+                    <div class="status">
+                        Quelle: Open-Meteo.com · ${new Date(current.time).toLocaleString('de-DE')}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Fehler beim Abrufen der Wetterdaten:', error);
+                weatherCard.innerHTML = `
+                    <h1>Fehler</h1>
+                    <div class="error">
+                        Die Wetterdaten konnten nicht geladen werden.<br>
+                        ${error.message}
+                    </div>
+                `;
+            });
+    })();
+</script>
+
+
+        <div class="main">
+          <section id="home">
+            <div class="main__container">
+              <div class="main__img--container">
+                <img src="cafe outside.jpg" alt="cafe outside" width="775">
+              </div>
+               <div class="main__content">
+                <h1 class="hero__tall" > Puppuccino - food and friends</h1>
+                <p class="hero_small">In diesem Café sind die Fellnasen die Stars des Tages. Natürlich bieten wir aber auch eine Vielzahl 
+an Speisen und Getränken an. Für die Zwei- und die Vierbeiner. Also kommt vorbei, überzeugt 
+euch selbst und verliebt euch in einen unserer Hunde, die allesamt zur Adoption freistehen. </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </header>
+
+<body>
+
+  
+   <div class="main">
+          <section id="home">
+            <div class="main__container">
+              <div class="main__content">
+                <h1 class="hero__tall" > Was ist Puppuccino? </h1>
+                <p class="hero_small">Im Puppuccino Café verbinden wir die zwei besten 
+Dinge miteinander. Gutes Essen und Hunde. 
+Unsere Hunde sind alle gerettet worden und erleben 
+bei uns nun endlich die Liebe und Fürsorge, die sie 
+ihr Leben lang schon verdienen. 
+Genießen Sie eines unserer warmen oder kalten 
+Angebote, spielen oder kuscheln Sie mit den 
+Hunden oder laufen mit ihnen im Café Garten rum. </p>
+              </div>
+              <div class="main__img--container">
+                <img src="hund mit crossaint.png" alt="Hund mit crossaint" width="775">
+              </div>
+            </div>
+          </section>
+        </div>
+
+
+<div class="main">
+          <section id="home">
+            <div class="main__container">
+               <div class="main__img--container">
+                <img src="hunde sandwiches.png" alt="Hunde sandwiches" width="775">
+              </div>
+              <div class="main__content">
+                <h1 class="hero__tall" > Unser Angebot</h1>
+                <p class="hero_small">Direkt nach den Vierbeinern sind die Speisen und 
+Getränke das Wichtigste im Puppuccino. Ob 
+herzhaft oder süß, heiß oder kalt: Hier findest du 
+sicher etwas nach deinem Geschmack. Für dich 
+und deinen Hund. </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+
+<div class="main">
+          <section id="home">
+            <div class="main__container">
+              <div class="main__content">
+                <h1 class="hero__tall" > Unsere Hunde </h1>
+                <p class="hero_small">Sie sind die wahren Stars im Haus. 
+Unsere Hunde! <br>
+Die sechs Fellnasen halten den Laden auf Trab, 
+rennen über unsere Wiese, kuscheln gerne. 
+Hier stellen wir sie euch einmal vor</p>
+              </div>
+              <div class="main__img--container">
+                <img src="german shepherd lying down.jpg" alt="german shepherd lying down" width="775">
+              </div>
+            </div>
+          </section>
+        </div>
+</body>
+      <footer>
+        <h3>Impressum | Datenschutz | Cookie-Einstellungen | Barrierefreiheit | AGB | Kontakt </h3>
+      </footer>
+    </body>
